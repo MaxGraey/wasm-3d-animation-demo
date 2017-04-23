@@ -1,19 +1,17 @@
 import {Vec3} from './vec3';
 
 export class Quaternion {
-    public data: Float32Array;
     constructor(
-        x: number = 0,
-        y: number = 0,
-        z: number = 0,
-        w: number = 1
+        public x: number = 0,
+        public y: number = 0,
+        public z: number = 0,
+        public w: number = 1
     ) {
-        this.data = new Float32Array([x, y, z, w]);
     }
 
     public static fromAxisAngle(axis: Vec3, angle: number): Quaternion {
-        let cos2 = Math.cos(angle / 2);
-        let sin2 = Math.sin(angle / 2);
+        let cos2 = Math.cos(angle * 0.5);
+        let sin2 = Math.sin(angle * 0.5);
 
         return new Quaternion(
             sin2 * axis.x(),
@@ -23,17 +21,17 @@ export class Quaternion {
         ).setNormal();
     }
 
-    public x() { return this.data[0]; }
-    public y() { return this.data[1]; }
-    public z() { return this.data[2]; }
-    public w() { return this.data[3]; }
-
     public setNormal(): Quaternion {
-        let mag = Math.sqrt(this.data[0] ** 2 + this.data[1] ** 2 + this.data[2] ** 2 + this.data[3] ** 2);
-        this.data[0] /= mag;
-        this.data[1] /= mag;
-        this.data[2] /= mag;
-        this.data[3] /= mag;
+        let x = this.x;
+        let y = this.y;
+        let z = this.z;
+        let w = this.w;
+
+        let mag = 1 / Math.sqrt(x * x + y * y + z * z + w * w);
+        this.x *= mag;
+        this.y *= mag;
+        this.z *= mag;
+        this.w *= mag;
         return this;
     }
 
@@ -42,7 +40,7 @@ export class Quaternion {
     }
 
     public clone(): Quaternion {
-        return new Quaternion(this.data[0], this.data[1], this.data[2], this.data[3]);
+        return new Quaternion(this.x, this.y, this.z, this.w);
     }
 
     /**
@@ -53,8 +51,8 @@ export class Quaternion {
      * @param {number} t between 0 and 1
      */
     public static slerp(a: Quaternion, b: Quaternion, t: number): Quaternion {
-        let ax = a.data[0], ay = a.data[1], az = a.data[2], aw = a.data[3];
-        let bx = b.data[0], by = b.data[1], bz = b.data[2], bw = b.data[3];
+        let ax = a.x, ay = a.y, az = a.z, aw = a.w;
+        let bx = b.x, by = b.y, bz = b.z, bw = b.w;
 
         let omega, cosom, sinom, scale0, scale1;
         // calc cosine
@@ -68,14 +66,16 @@ export class Quaternion {
             bw = - bw;
         }
         // calculate coefficients
-        if ( (1.0 - cosom) > 0.000001 ) {
+        if ((1.0 - cosom) > 0.000001) {
             // standard case (slerp)
             omega  = Math.acos(cosom);
             sinom  = Math.sin(omega);
-            scale0 = Math.sin((1.0 - t) * omega) / sinom;
-            scale1 = Math.sin(t * omega) / sinom;
-        } else {        
-            // "from" and "to" quaternions are very close 
+
+            let ot = t * omega;
+            scale0 = Math.sin(omega - ot) / sinom;
+            scale1 = Math.sin(ot) / sinom;
+        } else {
+            // "from" and "to" quaternions are very close
             //  ... so we can do a linear interpolation
             scale0 = 1.0 - t;
             scale1 = t;
@@ -95,8 +95,8 @@ export class Quaternion {
      * https://github.com/toji/gl-matrix/blob/master/src/gl-matrix/quat.js
      */
     public static multiply(a: Quaternion, b: Quaternion): Quaternion {
-        let ax = a.data[0], ay = a.data[1], az = a.data[2], aw = a.data[3];
-        let bx = b.data[0], by = b.data[1], bz = b.data[2], bw = b.data[3];
+        let ax = a.x, ay = a.y, az = a.z, aw = a.w;
+        let bx = b.x, by = b.y, bz = b.z, bw = b.w;
         return new Quaternion(
             ax * bw + aw * bx + ay * bz - az * by,
             ay * bw + aw * by + az * bx - ax * bz,
@@ -106,8 +106,8 @@ export class Quaternion {
     }
 
     public static rotateVec3(q: Quaternion, v: Vec3) {
-        let u = new Vec3(q.x(), q.y(), q.z());
-        let s = q.w();
+        let u = new Vec3(q.x, q.y, q.z);
+        let s = q.w;
 
         return u.scale(2 * Vec3.dot(u, v))
             .setAdd(v.scale(s * s - Vec3.dot(u, u)))

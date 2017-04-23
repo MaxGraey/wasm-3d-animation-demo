@@ -39,7 +39,7 @@ export class NaiveWASMAnimationManager extends AnimationManager {
     // Keep a pointer to the next available heap memory
     // In compilation C++ -> WASM, I noticed that what would be expected to be stack allocations
     //  were being treated as such - e.g.:
-    // 
+    //
     // int a;
     // int b; // &b = &a + sizeof(int)
     //
@@ -99,7 +99,7 @@ export class NaiveWASMAnimationManager extends AnimationManager {
             return;
         }
 
-        
+
         this.registerBones(animation);
         var pAnimationAddress = this.createAnimationData(animation);
         this.animationAddresses.set(animation, pAnimationAddress);
@@ -115,7 +115,7 @@ export class NaiveWASMAnimationManager extends AnimationManager {
             return;
         }
 
-        
+
         var pModelAddress = this.createModelData(model);
         this.modelAddresses.set(model, pModelAddress);
     }
@@ -221,7 +221,7 @@ export class NaiveWASMAnimationManager extends AnimationManager {
     }
 
     private serializeQuat(quat: Quaternion): Float32Array {
-        return quat.data;
+        return new Float32Array([quat.x, quat.y, quat.z, quat.w]);
     }
 
     private registerBones(animation: Animation) {
@@ -253,7 +253,7 @@ export class NaiveWASMAnimationManager extends AnimationManager {
 
         var animationFloatView = new Float32Array(this.memory.buffer, pAnimationData, 1);
         animationFloatView[0] = animation.duration;
-        
+
         var animationUintView = new Uint32Array(this.memory.buffer, pAnimationData + FLOAT_SIZE, 4);
         animationUintView[0] = animation.staticBones.size;
         animationUintView[2] = animation.animatedBones.size;

@@ -55,7 +55,7 @@ export class Mat4 {
     // https://github.com/toji/gl-matrix/blob/master/src/gl-matrix/mat4.js
     public setRotationTranslationScale(rotation: Quaternion, translation: Vec3, scale: Vec3): Mat4 {
         // Quaternion math
-        let x = rotation.data[0], y = rotation.data[1], z = rotation.data[2], w = rotation.data[3],
+        let x = rotation.x, y = rotation.y, z = rotation.z, w = rotation.w,
             x2 = x + x,
             y2 = y + y,
             z2 = z + z,
@@ -115,7 +115,7 @@ export class Mat4 {
             centerx = center.x(),
             centery = center.y(),
             centerz = center.z();
-        
+
         if (Math.abs(eyex - centerx) < 0.001 &&
             Math.abs(eyey - centery) < 0.001 &&
             Math.abs(eyez - centerz) < 0.001) {
@@ -224,7 +224,7 @@ export class Mat4 {
     public static mul(a: Mat4, b: Mat4): Mat4 {
         let tr = new Mat4();
 
-        
+
         for (let row = 0; row < 4; row++) {
             for (let col = 0; col < 4; col++) {
                 tr.data[row * 4 + col] = 0;
